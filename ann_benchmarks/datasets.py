@@ -476,6 +476,28 @@ def movielens20m(out_fn):
     movielens("ml-20m.zip", "ml-20m/ratings.csv", out_fn, ",", True)
 
 
+# Change Code - Dice Integration
+def dicee_knowledge_graphs(out_fn):
+    # import zipfile
+
+    # TODO : Import KGs from URL
+    # url = "https://hobbitdata.informatik.uni-leipzig.de/KG/KGs.zip"
+    # fn = os.path.join("data", "KGs.zip")
+    # download(url, fn)
+    # with zipfile.ZipFile(fn) as z:
+    #     print("preparing %s" % out_fn)
+    z_fn = os.path.join("data", "ConEx_entity_embeddings.csv")
+    X = []
+    file = open(z_fn)
+    file.readline()
+    for line in file:
+        v = [float(x) for x in line.strip().split(',')[1:]]
+        X.append(numpy.array(v))
+    X_train, X_test = train_test_split(numpy.array(X))
+    write_output(numpy.array(X_train), numpy.array(X_test), out_fn, "angular")
+# Change Code - Dice Integration
+
+
 DATASETS = {
     "deep-image-96-angular": deep_image,
     "fashion-mnist-784-euclidean": fashion_mnist,
@@ -504,4 +526,5 @@ DATASETS = {
     "movielens1m-jaccard": movielens1m,
     "movielens10m-jaccard": movielens10m,
     "movielens20m-jaccard": movielens20m,
+    "dicee_knowledge_graphs": lambda out_fn: dicee_knowledge_graphs(out_fn)
 }
