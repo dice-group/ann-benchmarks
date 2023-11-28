@@ -341,15 +341,15 @@ float:
       run-groups:
         ball:
           args: *treeargs
-    ckdtree:
-      disable: true
-      docker-tag: ann-benchmarks-scipy
-      module: ann_benchmarks.algorithms.ckdtree
-      constructor: CKDTree
-      base-args: ["@metric"]
-      run-groups:
-        ball:
-          args: *treeargs
+    # ckdtree:
+    #   disable: true
+    #   docker-tag: ann-benchmarks-scipy
+    #   module: ann_benchmarks.algorithms.ckdtree
+    #   constructor: CKDTree
+    #   base-args: ["@metric"]
+    #   run-groups:
+    #     ball:
+    #       args: *treeargs
     BallTree(nmslib):
       docker-tag: ann-benchmarks-nmslib
       module: ann_benchmarks.algorithms.nmslib
