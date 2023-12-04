@@ -307,6 +307,20 @@ def main():
     if os.path.exists(INDEX_DIR):
         shutil.rmtree(INDEX_DIR)
 
+    # PSEUDO CODE FOR BAYOPT APPROACH 1
+    # IF args contain UseBayOpt
+    # THEN 
+    #   LOOP ON EACH DEFINITION
+    #       Run the Bayesian Optimizer with current Recall Results to obtain new parameters
+    #       Create a new definition with the newly obtained parameters
+    #       RUN ANN-Benchmarks for this single definition
+    #       EXIT ON CERTAIN CONDITION (TBD)
+    #   END LOOP
+    #   LOAD THESE NEWLY OBTAINED DEFINITIONS
+    # ELSE 
+    #   execute previous code until the point where a list of definitions is returned and loaded
+    # END IF
+
     dataset, dimension = get_dataset(args.dataset)
     definitions: List[Definition] = get_definitions(
         dimension=dimension,
