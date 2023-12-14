@@ -32,8 +32,8 @@ def run_using_bayesian_optimizer(definition: Definition, args: argparse.Namespac
     pbounds = create_parameter_bounds_from(param_positions_bounds_dict)
     print(f"Parameter Bounds are: {pbounds}")
     random_state=1
-    init_points=1
-    n_iter=1
+    init_points=2
+    n_iter=5
     def black_box_function(**kwargs):
         """Function with unknown internals we wish to maximize."""
         new_params = kwargs
