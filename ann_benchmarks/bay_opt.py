@@ -26,12 +26,29 @@ def set_params(definition: Definition, new_params: dict):
         print(f"New Value at Location : {definition.arguments[int(k)]} at {int(k)}")
 
 def obtain_recall_from(filepath: str, dataset_name: str) -> float:
+    print(f"Looking for file: {filepath}")
     if len(list(load_a_result(filepath))) > 0:
             res = load_a_result(filepath)
             dataset, _ = get_dataset(dataset_name)
             run_results = compute_metrics_all_runs(dataset, res)
             for result in run_results:
                 return result["k-nn"]  # 'k-nn': The key for Recall value
+
+def obtain_recalls_and_results(definition: Definition, args: argparse.Namespace) -> (list, list):
+    recall_values = []
+    result_file_paths = []
+    if definition.query_argument_groups:
+        for query_arguments in definition.query_argument_groups:
+            filepath = build_result_filepath(args.dataset, args.count, definition, query_arguments, args.batch)
+            recall_values.append(obtain_recall_from(filepath, args.dataset))
+            result_file_paths.append(filepath)
+    else:
+        filepath = build_result_filepath(args.dataset, args.count, definition, definition.query_argument_groups, args.batch)
+        recall_values.append(obtain_recall_from(filepath, args.dataset))
+        result_file_paths.append(filepath)
+
+    return (recall_values, result_file_paths)   # Return recall values and file paths
+    
 
 def run_using_bayesian_optimizer(definition: Definition, args: argparse.Namespace, param_positions_bounds_dict: dict[int, tuple]):
     # pbounds = {'1': (10, 1000), '2': (1, 105),...} 
@@ -46,25 +63,21 @@ def run_using_bayesian_optimizer(definition: Definition, args: argparse.Namespac
         new_params = kwargs
         # Check the no. of parameters
         assert len(definition.arguments) >= len(new_params), "NO. OF OPTIMIZED PARAMETERS IS MORE THAN REQUIRED."
-
-        # Set parameters in definition as the newly obtained parameters
+        # Set newly obtained parameters in definition
         set_params(definition, new_params)
-
-        # RUN ANN-Benchmarks for this definition
+        # RUN ANN-Benchmarks for this updated definition
         from ann_benchmarks.main import create_workers_and_execute  # Import here to avoid cyclical imports error
         create_workers_and_execute([definition], args)
-
-        # Compute the Recall from the result (written in a file) of this newly run experiment
-        filepath = build_result_filepath(args.dataset, args.count, definition, definition.query_argument_groups, args.batch)
-        print(f"Looking for file: {filepath}")
-        recall = obtain_recall_from(filepath, args.dataset)
-        print(f"Recall: {recall}")
-
-        # Move the result file to another directory
+        # Compute the maximum Recall from the result files of this newly run experiment        
+        recall_values, result_path_list = obtain_recalls_and_results(definition, args)
+        print(f"Recall Values: {recall_values}")
+        print(f"Max Recall Value: {max(recall_values)}")
+        # Move the result files to another directory, if asked
         if args.move_bayesian_optimizer_result_files:
-            move_result_to_bay_opt_dir(filepath)
+            for filepath in result_path_list:
+                move_result_to_bay_opt_dir(filepath)
 
-        return recall # Return recall value to be maximized by Bayesian Optimizer
+        return max(recall_values) # Return max recall value to Bayesian Optimizer
 
     optimizer = BayesianOptimization(
         f=black_box_function, # Function to be evaluated
@@ -78,9 +91,6 @@ def run_using_bayesian_optimizer(definition: Definition, args: argparse.Namespac
     )
 
     print(f"Optimizer max: {optimizer.max}")
-    # Set parameters providing maximum Recall in definition
-    # set_params(definition, optimizer.max['params'])
-    # print(f"New definition: {definition}")
     
     for i, res in enumerate(optimizer.res):
         print("Iteration {}: \n\t{}".format(i, res))
