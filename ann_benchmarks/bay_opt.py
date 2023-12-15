@@ -16,7 +16,14 @@ def create_parameter_bounds_from(param_positions_bounds_dict: dict[int, tuple]) 
 
 def set_params(definition: Definition, new_params: dict):
     for _, (k,v) in enumerate(new_params.items()):
-        definition.arguments[int(k)] = v
+        # Set new parameter based on original parameter type
+        if isinstance(definition.arguments[int(k)], int):
+            definition.arguments[int(k)] = int(v)
+        elif isinstance(definition.arguments[int(k)], float):
+            definition.arguments[int(k)] = float(v)
+        else:
+            definition.arguments[int(k)] = v
+        print(f"New Value at Location : {definition.arguments[int(k)]} at {int(k)}")
 
 def obtain_recall_from(filepath: str, dataset_name: str) -> float:
     if len(list(load_a_result(filepath))) > 0:
@@ -37,7 +44,6 @@ def run_using_bayesian_optimizer(definition: Definition, args: argparse.Namespac
     def black_box_function(**kwargs):
         """Function with unknown internals we wish to maximize."""
         new_params = kwargs
-        print(f"New Parameters: {new_params}")
         # Check the no. of parameters
         assert len(definition.arguments) >= len(new_params), "NO. OF OPTIMIZED PARAMETERS IS MORE THAN REQUIRED."
 
