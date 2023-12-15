@@ -154,13 +154,13 @@ def move_result_to_bay_opt_dir(file_path: str):
             os.makedirs(directory)
     except Exception:
         print(f"Could not create directory {directory}")
-        traceback.print_exc()
+        # traceback.print_exc()
         return
     try:
         shutil.move(file_path, destination_file_path)
     except Exception:
         print(f"Could not move file to {destination_file_path}")
-        traceback.print_exc()
+        # traceback.print_exc()
         return
     # Remove now empty source file directories
     directory, _ = os.path.split(file_path)
