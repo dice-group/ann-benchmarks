@@ -3,9 +3,9 @@ Benchmarking nearest neighbors
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/erikbern/ann-benchmarks/benchmarks.yml?branch=main&style=flat-square)](https://github.com/erikbern/ann-benchmarks/actions/workflows/benchmarks.yml)
 
-Doing fast searching of nearest neighbors in high dimensional spaces is an increasingly important problem, but so far there has not been a lot of empirical attempts at comparing approaches in an objective way.
+Doing fast searching of nearest neighbors in high dimensional spaces is an increasingly important problem with notably few empirical attempts at comparing approaches in an objective way, despite a clear need for such to drive optimization forward.
 
-This project contains some tools to benchmark various implementations of approximate nearest neighbor (ANN) search for different metrics. We have pregenerated datasets (in HDF5) formats and we also have Docker containers for each algorithm. There's a [test suite](https://github.com/erikbern/ann-benchmarks/actions) that makes sure every algorithm works.
+This project contains tools to benchmark various implementations of approximate nearest neighbor (ANN) search for selected metrics. We have pre-generated datasets (in HDF5 format) and prepared Docker containers for each algorithm, as well as a [test suite](https://github.com/erikbern/ann-benchmarks/actions) to verify function integrity.
 
 Evaluated
 =========
@@ -13,6 +13,7 @@ Evaluated
 * [Annoy](https://github.com/spotify/annoy) ![https://img.shields.io/github/stars/spotify/annoy?style=social](https://img.shields.io/github/stars/spotify/annoy?style=social)
 * [FLANN](http://www.cs.ubc.ca/research/flann/) ![https://img.shields.io/github/stars/flann-lib/flann?style=social](https://img.shields.io/github/stars/flann-lib/flann?style=social)
 * [scikit-learn](http://scikit-learn.org/stable/modules/neighbors.html): LSHForest, KDTree, BallTree
+* [Weaviate](https://github.com/weaviate/weaviate) ![https://img.shields.io/github/stars/weaviate/weaviate?style=social](https://img.shields.io/github/stars/weaviate/weaviate?style=social)
 * [PANNS](https://github.com/ryanrhymes/panns) ![https://img.shields.io/github/stars/ryanrhymes/panns?style=social](https://img.shields.io/github/stars/ryanrhymes/panns?style=social)
 * [NearPy](http://pixelogik.github.io/NearPy/) ![https://img.shields.io/github/stars/pixelogik/NearPy?style=social](https://img.shields.io/github/stars/pixelogik/NearPy?style=social)
 * [KGraph](https://github.com/aaalgo/kgraph) ![https://img.shields.io/github/stars/aaalgo/kgraph?style=social](https://img.shields.io/github/stars/aaalgo/kgraph?style=social)
@@ -22,6 +23,7 @@ Evaluated
 * [FAISS](https://github.com/facebookresearch/faiss) ![https://img.shields.io/github/stars/facebookresearch/faiss?style=social](https://img.shields.io/github/stars/facebookresearch/faiss?style=social)
 * [DolphinnPy](https://github.com/ipsarros/DolphinnPy) ![https://img.shields.io/github/stars/ipsarros/DolphinnPy?style=social](https://img.shields.io/github/stars/ipsarros/DolphinnPy?style=social)
 * [Datasketch](https://github.com/ekzhu/datasketch) ![https://img.shields.io/github/stars/ekzhu/datasketch?style=social](https://img.shields.io/github/stars/ekzhu/datasketch?style=social)
+* [nndescent](https://github.com/brj0/nndescent) ![https://img.shields.io/github/stars/brj0/nndescent?style=social](https://img.shields.io/github/stars/brj0/nndescent?style=social)
 * [PyNNDescent](https://github.com/lmcinnes/pynndescent) ![https://img.shields.io/github/stars/lmcinnes/pynndescent?style=social](https://img.shields.io/github/stars/lmcinnes/pynndescent?style=social)
 * [MRPT](https://github.com/teemupitkanen/mrpt) ![https://img.shields.io/github/stars/teemupitkanen/mrpt?style=social](https://img.shields.io/github/stars/teemupitkanen/mrpt?style=social)
 * [NGT](https://github.com/yahoojapan/NGT) ![https://img.shields.io/github/stars/yahoojapan/NGT?style=social](https://img.shields.io/github/stars/yahoojapan/NGT?style=social): ONNG, PANNG, QG
@@ -29,6 +31,8 @@ Evaluated
 * [PUFFINN](https://github.com/puffinn/puffinn) ![https://img.shields.io/github/stars/puffinn/puffinn?style=social](https://img.shields.io/github/stars/puffinn/puffinn?style=social)
 * [N2](https://github.com/kakao/n2) ![https://img.shields.io/github/stars/kakao/n2?style=social](https://img.shields.io/github/stars/kakao/n2?style=social)
 * [ScaNN](https://github.com/google-research/google-research/tree/master/scann)
+* [Vearch](https://github.com/vearch/vearch) ![https://img.shields.io/github/stars/vearch/vearch?style=social](https://img.shields.io/github/stars/vearch/vearch?style=social)
+* [Elasticsearch](https://github.com/elastic/elasticsearch) ![https://img.shields.io/github/stars/elastic/elasticsearch?style=social](https://img.shields.io/github/stars/elastic/elasticsearch?style=social): HNSW
 * [Elastiknn](https://github.com/alexklibisz/elastiknn) ![https://img.shields.io/github/stars/alexklibisz/elastiknn?style=social](https://img.shields.io/github/stars/alexklibisz/elastiknn?style=social)
 * [OpenSearch KNN](https://github.com/opensearch-project/k-NN) ![https://img.shields.io/github/stars/opensearch-project/k-NN?style=social](https://img.shields.io/github/stars/opensearch-project/k-NN?style=social)
 * [DiskANN](https://github.com/microsoft/diskann) ![https://img.shields.io/github/stars/microsoft/diskann?style=social](https://img.shields.io/github/stars/microsoft/diskann?style=social): Vamana, Vamana-PQ
@@ -36,15 +40,17 @@ Evaluated
 * [scipy](https://docs.scipy.org/doc/scipy/reference/spatial.html): cKDTree
 * [vald](https://github.com/vdaas/vald) ![https://img.shields.io/github/stars/vdaas/vald?style=social](https://img.shields.io/github/stars/vdaas/vald?style=social)
 * [Qdrant](https://github.com/qdrant/qdrant) ![https://img.shields.io/github/stars/qdrant/qdrant?style=social](https://img.shields.io/github/stars/qdrant/qdrant?style=social)
-* [qsgngtlib](https://gitee.com/WPJIANG-gitee/hwtl_sdu-anns-qsgngtlib)
+* [HUAWEI(qsgngt)](https://github.com/WPJiang/HWTL_SDU-ANNS.git)
 * [Milvus](https://github.com/milvus-io/milvus) ![https://img.shields.io/github/stars/milvus-io/milvus?style=social](https://img.shields.io/github/stars/milvus-io/milvus?style=social): [Knowhere](https://github.com/milvus-io/knowhere)
+* [Zilliz(Glass)](https://github.com/hhy3/pyglass)
 * [pgvector](https://github.com/pgvector/pgvector) ![https://img.shields.io/github/stars/pgvector/pgvector?style=social](https://img.shields.io/github/stars/pgvector/pgvector?style=social)
-* [Glass](https://github.com/hhy3/pyglass) 
+* [RediSearch](https://github.com/redisearch/redisearch) ![https://img.shields.io/github/stars/redisearch/redisearch?style=social](https://img.shields.io/github/stars/redisearch/redisearch?style=social)
+  * [pg_embedding](https://github.com/neondatabase/pg_embedding) ![https://img.shields.io/github/stars/pg_embedding/pg_embedding?style=social](https://img.shields.io/github/stars/neondatabase/pg_embedding?style=social)
 
 Data sets
 =========
 
-We have a number of precomputed data sets for this. All data sets are pre-split into train/test and come with ground truth data in the form of the top 100 neighbors. We store them in a HDF5 format:
+We have a number of precomputed data sets in HDF5 format. All data sets have been pre-split into train/test and include ground truth data for the top-100 nearest neighbors.
 
 | Dataset                                                           | Dimensions | Train size | Test size | Neighbors | Distance  | Download                                                                   |
 | ----------------------------------------------------------------- | ---------: | ---------: | --------: | --------: | --------- | -------------------------------------------------------------------------- |
@@ -65,7 +71,7 @@ We have a number of precomputed data sets for this. All data sets are pre-split 
 Results
 =======
 
-Interactive plots can be found at <http://ann-benchmarks.com>. These are all as of December 2021, running all benchmarks on a r5.4xlarge machine on AWS with `--parallelism 7`:
+These are all as of April 2023, running all benchmarks on a r6i.16xlarge machine on AWS with `--parallelism 31` and hyperthreading disabled. All benchmarks are single-CPU.
 
 glove-100-angular
 -----------------
@@ -82,20 +88,22 @@ fashion-mnist-784-euclidean
 
 ![fashion-mnist-784-euclidean](https://raw.github.com/erikbern/ann-benchmarks/master/results/fashion-mnist-784-euclidean.png)
 
-lastfm-64-dot
-------------------
-
-![lastfm-64-dot](https://raw.github.com/erikbern/ann-benchmarks/master/results/lastfm-64-dot.png)
-
 nytimes-256-angular
 -------------------
 
 ![nytimes-256-angular](https://raw.github.com/erikbern/ann-benchmarks/master/results/nytimes-256-angular.png)
 
+gist-960-euclidean
+-------------------
+
+![gist-960-euclidean](https://raw.github.com/erikbern/ann-benchmarks/master/results/gist-960-euclidean.png)
+
 glove-25-angular
 ----------------
 
 ![glove-25-angular](https://raw.github.com/erikbern/ann-benchmarks/master/results/glove-25-angular.png)
+
+TODO: update plots on <http://ann-benchmarks.com>.
 
 Install
 =======
@@ -113,19 +121,23 @@ Running
 2. Run `python plot.py` or `python create_website.py` to plot results.
 3. Run `python data_export.py --out res.csv` to export all results into a csv file for additional post-processing.
 
-You can customize the algorithms and datasets if you want to:
+You can customize the algorithms and datasets as follows:
 
-* Check that `algos.yaml` contains the parameter settings that you want to test
+* Check that `ann_benchmarks/algorithms/{YOUR_IMPLEMENTATION}/config.yml` contains the parameter settings that you want to test
 * To run experiments on SIFT, invoke `python run.py --dataset glove-100-angular`. See `python run.py --help` for more information on possible settings. Note that experiments can take a long time. 
 * To process the results, either use `python plot.py --dataset glove-100-angular` or `python create_website.py`. An example call: `python create_website.py --plottype recall/time --latex --scatter --outputdir website/`. 
 
 Including your algorithm
 ========================
 
-1. Add your algorithm into `ann_benchmarks/algorithms` by providing a small Python wrapper.
-2. Add a Dockerfile in `install/` for it
-3. Add it to `algos.yaml`
-4. Add it to `.github/workflows/benchmarks.yml`
+Add your algorithm in the folder `ann_benchmarks/algorithms/{YOUR_IMPLEMENTATION}/` by providing
+
+- [ ] A small Python wrapper in `module.py`
+- [ ] A Dockerfile named `Dockerfile` 
+- [ ] A set of hyper-parameters in `config.yml`
+- [ ] A CI test run by adding your implementation to `.github/workflows/benchmarks.yml`
+
+Check the [available implementations](./ann_benchmarks/algorithms/) for inspiration.
 
 Principles
 ==========
@@ -152,10 +164,11 @@ Built by [Erik Bernhardsson](https://erikbern.com) with significant contribution
 Related Publication
 ==================
 
-The following publication details design principles behind the benchmarking framework: 
+Design principles behind the benchmarking framework are described in the following publications: 
 
 - M. Aumüller, E. Bernhardsson, A. Faithfull:
 [ANN-Benchmarks: A Benchmarking Tool for Approximate Nearest Neighbor Algorithms](https://arxiv.org/abs/1807.05614). Information Systems 2019. DOI: [10.1016/j.is.2019.02.006](https://doi.org/10.1016/j.is.2019.02.006)
+-   M. Aumüller, E. Bernhardsson, A. Faithfull: [Reproducibility protocol for ANN-Benchmarks: A benchmarking tool for approximate nearest neighbor search algorithms](https://itu.dk/people/maau/additional/2022-ann-benchmarks-reproducibility.pdf), [Artifacts](https://doi.org/10.5281/zenodo.4607761).
 
 Related Projects
 ================
