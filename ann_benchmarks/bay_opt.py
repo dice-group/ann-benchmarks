@@ -33,6 +33,8 @@ def obtain_recall_from(filepath: str, dataset_name: str) -> float:
             run_results = compute_metrics_all_runs(dataset, res)
             for result in run_results:
                 return result["k-nn"]  # 'k-nn': The key for Recall value
+    else:
+        return 0    # To handle error cases e.g. FileNotFound Error
 
 def obtain_recalls_and_results(definition: Definition, args: argparse.Namespace) -> (list, list):
     recall_values = []
