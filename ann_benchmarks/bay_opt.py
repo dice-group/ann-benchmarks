@@ -83,6 +83,7 @@ def run_using_bayesian_optimizer(definition: Definition, args: argparse.Namespac
         f=black_box_function, # Function to be evaluated
         pbounds=pbounds, # Bounded region of parameter space
         random_state=random_state,
+        allow_duplicate_points=True
     )
     
     optimizer.maximize( # Choose the parameters which maximize the function value
