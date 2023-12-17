@@ -309,16 +309,15 @@ def limit_algorithms(definitions: List[Definition], limit: int) -> List[Definiti
 def obtain_bay_opt_definitions_from(definitions: List[Definition]) -> List[Definition]:
     bay_opt_definitions = []
     for definition in definitions:
-        is_a_bay_opt_definition = False
+        can_be_a_bay_opt_definition = False
         for param in definition.arguments:
             if isinstance(param, Number):
-                is_a_bay_opt_definition = True
+                can_be_a_bay_opt_definition = True
                 break
-        if is_a_bay_opt_definition:
+        if can_be_a_bay_opt_definition:
             bay_opt_definitions.append(definition)
 
     return bay_opt_definitions
-
 
 
 def main():
@@ -370,13 +369,10 @@ def main():
         logger.info(f"use_bayesian_optimizer set as {args.use_bayesian_optimizer}")
         # Create a list of definitions where Bayesian Optimizer can be used
         bay_opt_definitions = obtain_bay_opt_definitions_from(definitions)
-        logger.info(f"Bayesian Optimizer would be run only on these definitions: {bay_opt_definitions}")
         # Filter out Bay Opt definitions.
         definitions = [definition for definition in definitions if definition not in bay_opt_definitions]
-        logger.info(f"#########################################################################")
-        logger.info(f"Execute these definitions without using Bayesian Optimizer: {definitions}")
-        
-        while(len(bay_opt_definitions) > 0):    # Until the list is exhausted
+        # Until the list is exhausted
+        while(len(bay_opt_definitions) > 0):
             current_definitions = []
             current_definition = bay_opt_definitions.pop() # This definition is chosen for Bayesian Optimizer
             current_definitions.append(current_definition)
@@ -384,7 +380,7 @@ def main():
             for (i,v) in enumerate(current_definition.arguments):
                 if isinstance(v, Number):
                     param_positions_bounds_dict[i] = (v, v)
-
+            assert len(param_positions_bounds_dict) > 0, "ERROR: CANNOT RUN BAYESIAN OPTIMIZER!"
             # Check whether other similar definitions exist which can be merged
             for definition in bay_opt_definitions:
                 if definition.algorithm is current_definition.algorithm \
@@ -412,10 +408,21 @@ def main():
                             else:
                                 # Do nothing
                                 pass
-            
+            # Update the list
             bay_opt_definitions = [definition for definition in bay_opt_definitions if definition not in current_definitions]
-            logger.info(f"Merged these definitions for Bayesian Optimizer: {current_definitions}")
-            assert len(param_positions_bounds_dict) > 0, "ERROR: CANNOT RUN BAYESIAN OPTIMIZER!"
+            # Check if there is anything to optimize in `param_positions_bounds_dict`
+            remove_keys = []
+            for k, v in param_positions_bounds_dict.items():
+                min, max = v
+                if min == max:
+                    remove_keys.append(k)
+            for key in remove_keys:
+                param_positions_bounds_dict.pop(key)
+            if len(param_positions_bounds_dict) == 0:   # Nothing to optimize
+                # Add `current_definitions` back to original defintions list (to run without Bayesian Optimizer)
+                for definition in current_definitions:
+                    definitions.append(definition)
+                continue
             # Run `current_definition` using Bayesian Optimizer
             logger.info(f"Running Bayesian Optimizer for: {current_definition},{param_positions_bounds_dict},{args}")
             run_using_bayesian_optimizer(current_definition, args, param_positions_bounds_dict)
