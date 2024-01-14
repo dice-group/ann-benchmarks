@@ -306,20 +306,6 @@ def limit_algorithms(definitions: List[Definition], limit: int) -> List[Definiti
     """
     return definitions if limit < 0 else definitions[:limit]
 
-def obtain_bay_opt_definitions_from(definitions: List[Definition]) -> List[Definition]:
-    bay_opt_definitions = []
-    for definition in definitions:
-        can_be_a_bay_opt_definition = False
-        for param in definition.arguments:
-            if isinstance(param, Number):
-                can_be_a_bay_opt_definition = True
-                break
-        if can_be_a_bay_opt_definition:
-            bay_opt_definitions.append(definition)
-
-    return bay_opt_definitions
-
-
 def main():
     args = parse_arguments()
 
