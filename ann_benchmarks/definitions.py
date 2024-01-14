@@ -360,3 +360,16 @@ def get_definitions(
         
 
     return definitions
+
+def similar_definitions_for_optimizer(definition_1: Definition, definition_2: Definition) -> bool:
+    if definition_1.algorithm is definition_2.algorithm and \
+        definition_1.constructor is definition_2.constructor and \
+        definition_1.module is definition_2.module and \
+        definition_1.docker_tag is definition_2.docker_tag and \
+        definition_1.disabled is definition_2.disabled and \
+        len(definition_1.arguments) == len(definition_2.arguments) and \
+        len(definition_1.query_argument_groups) == len(definition_2.query_argument_groups) and \
+        [len(query_args) for query_args in definition_1.query_argument_groups] == [len(query_args) for query_args in definition_2.query_argument_groups]:
+        return True
+    
+    return False
