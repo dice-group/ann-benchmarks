@@ -56,8 +56,13 @@ def new_value_in_original_type(old_value, k, v):
 def set_params(definition: Definition, new_params: dict):
     # Replace the values obtained from the optimizer in their original positions 
     print(f"In set_params")
-    arguments_list = [None] * len(definition.arguments)
-    query_arguments_list = [None] * len(definition.query_argument_groups[0])
+    arguments_list = None
+    query_arguments_list = None
+    if len(definition.arguments) > 0:
+        arguments_list = [None] * len(definition.arguments)
+    if len(definition.query_argument_groups) > 0:
+        query_arguments_list = [None] * len(definition.query_argument_groups[0])
+        
     for _, (k,v) in enumerate(new_params.items()):
         print(f"k: {k}")
         # Get the original position of the parameter (encoded in key)
@@ -77,8 +82,10 @@ def set_params(definition: Definition, new_params: dict):
             new_value = new_value_in_original_type(old_value, k, v)     # Set new parameter based on original parameter type
             query_arguments_list[pos] = new_value
             print(f"New Value(Type) at Location : {new_value}({type(new_value)}) at {pos}")
-    definition.arguments = arguments_list
-    definition.query_argument_groups = [query_arguments_list]
+    if arguments_list is not None:
+        definition.arguments = arguments_list
+    if query_arguments_list is not None:
+        definition.query_argument_groups = [query_arguments_list]
     print(f"New arguments: {definition.arguments}")
     print(f"New query arguments: {definition.query_argument_groups}")
 
@@ -185,17 +192,9 @@ def execute_using_bayesian_optimizer(bay_opt_definitions: list[Definition], args
     print(f'query_args_df: {query_args_df}')
     # Arrange dataframes in dictionaries as per required format
     param_positions_bounds_dict = obtain_param_positions_bounds_dict({'args': args_df, 'query_args': query_args_df})
-    # print(f'args_positions_bounds_dict: {args_positions_bounds_dict}')
-    # query_args_positions_bounds_dict = obtain_param_positions_bounds_dict(query_args_df)
-    # print(f'query_args_positions_bounds_dict: {query_args_positions_bounds_dict}')
-    # # Prepare param_positions_bounds_dict = args_positions_bounds_dict + query_args_positions_bounds_dict
-    # param_positions_bounds_dict = args_positions_bounds_dict 
-    # for _, (k,v) in enumerate(query_args_positions_bounds_dict.items()):
-    #     param_positions_bounds_dict[str('query_' + str(k))] = v
     print(f'param_positions_bounds_dict: {param_positions_bounds_dict}')
     print(f'str_dict: {str_dict}')
-    set_params(bay_opt_definitions[0],{'args_pos_0': 0, 'args_pos_1': 0, 'args_pos_2': 0.1, 'args_pos_key_diversify_prob_3': 1.5, 'args_pos_key_pruning_degree_multiplier_3': 2.9, 'query_args_pos_0': 8})
-    # run_using_bayesian_optimizer(bay_opt_definitions.pop(), args, param_positions_bounds_dict)
+    run_using_bayesian_optimizer(bay_opt_definitions[0], args, param_positions_bounds_dict)
     
 
 
