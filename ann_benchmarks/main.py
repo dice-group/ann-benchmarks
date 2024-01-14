@@ -15,12 +15,12 @@ import docker
 import psutil
 
 from .definitions import (Definition, InstantiationStatus, algorithm_status,
-                                     get_definitions, list_algorithms)
+                                     get_definitions, list_algorithms, similar_definitions_for_optimizer)
 from .constants import INDEX_DIR
 from .datasets import DATASETS, get_dataset
 from .results import build_result_filepath
 from .runner import run, run_docker
-from .bay_opt import run_using_bayesian_optimizer
+from .bay_opt import execute_using_bayesian_optimizer
 
 logging.config.fileConfig("logging.conf")
 logger = logging.getLogger("annb")
@@ -367,64 +367,23 @@ def main():
 
     if args.use_bayesian_optimizer:
         logger.info(f"use_bayesian_optimizer set as {args.use_bayesian_optimizer}")
-        # Create a list of definitions where Bayesian Optimizer can be used
-        bay_opt_definitions = obtain_bay_opt_definitions_from(definitions)
-        # Filter out Bay Opt definitions.
-        definitions = [definition for definition in definitions if definition not in bay_opt_definitions]
         # Until the list is exhausted
-        while(len(bay_opt_definitions) > 0):
-            current_definitions = []
-            current_definition = bay_opt_definitions.pop() # This definition is chosen for Bayesian Optimizer
-            current_definitions.append(current_definition)
-            param_positions_bounds_dict = {}    # Useful for Bayesian Optimizer. Can look like {1: (10, 1000)}
-            for (i,v) in enumerate(current_definition.arguments):
-                if isinstance(v, Number):
-                    param_positions_bounds_dict[i] = (v, v)
-            assert len(param_positions_bounds_dict) > 0, "ERROR: CANNOT RUN BAYESIAN OPTIMIZER!"
-            # Check whether other similar definitions exist which can be merged
-            for definition in bay_opt_definitions:
-                if definition.algorithm is current_definition.algorithm \
-                and definition.constructor is current_definition.constructor \
-                and definition.module is current_definition.module \
-                and len(definition.arguments) == len(current_definition.arguments):
-                    cannot_be_merged = False
-                    for (i,v) in enumerate(current_definition.arguments):
-                        # Check whether all non-Number parameters are equal
-                        if i not in param_positions_bounds_dict.keys():
-                            if definition.arguments[i] != v:
-                                cannot_be_merged = True
-                                break
-                    if cannot_be_merged is False:
-                        current_definitions.append(definition)
-                        # Merge the `definition` with `current_definition` by adapting the parameter bounds
-                        for k, v in param_positions_bounds_dict.items(): 
-                            min, max = v
-                            if definition.arguments[k] < min:
-                                # Replace minimum value in parameter bounds
-                                param_positions_bounds_dict[k] = (definition.arguments[k], max)
-                            elif definition.arguments[k] > max:
-                                # Replace maximum value in parameter bounds
-                                param_positions_bounds_dict[k] = (min, definition.arguments[k])
-                            else:
-                                # Do nothing
-                                pass
-            # Update the list
-            bay_opt_definitions = [definition for definition in bay_opt_definitions if definition not in current_definitions]
-            # Check if there is anything to optimize in `param_positions_bounds_dict`
-            remove_keys = []
-            for k, v in param_positions_bounds_dict.items():
-                min, max = v
-                if min == max:
-                    remove_keys.append(k)
-            for key in remove_keys:
-                param_positions_bounds_dict.pop(key)
-            if len(param_positions_bounds_dict) == 0:   # Nothing to optimize
-                # Add `current_definitions` back to original defintions list (to run without Bayesian Optimizer)
-                for definition in current_definitions:
-                    definitions.append(definition)
-                continue
-            # Run `current_definition` using Bayesian Optimizer
-            logger.info(f"Running Bayesian Optimizer for: {current_definition},{param_positions_bounds_dict},{args}")
-            run_using_bayesian_optimizer(current_definition, args, param_positions_bounds_dict)
-
-    create_workers_and_execute(definitions, args)
+        while(len(definitions) > 0):
+            bay_opt_definitions = []
+            definition_1 = definitions.pop() # This definition is chosen for Bayesian Optimizer
+            bay_opt_definitions.append(definition_1)
+            # Check if there are any more definitions left to compare
+            if len(definitions) > 0:
+                # Search for other similar definitions
+                for other_definition in definitions:
+                    if similar_definitions_for_optimizer(definition_1, other_definition):
+                        bay_opt_definitions.append(other_definition)
+            # Filter out the definitions which will be passed to the optimizer
+            definitions = [definition for definition in definitions if definition not in bay_opt_definitions]
+            logger.info(f"Running Bayesian Optimizer for: {bay_opt_definitions},{args}")
+            execute_using_bayesian_optimizer(bay_opt_definitions, args)
+    
+    if len(definitions) > 0:
+        create_workers_and_execute(definitions, args)
+    
+    
