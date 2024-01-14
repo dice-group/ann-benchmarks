@@ -49,6 +49,12 @@ def new_value_in_original_type(old_value, k, v):
         new_dict_value = new_value_in_original_type(old_value[key], k, v) # ALERT: Recursion here!
         new_dict[key] = new_dict_value
         new_value = new_dict
+    elif isinstance(old_value, list):
+        loc = int(k[k.rindex('list_')+5:k.rindex('_')])
+        new_list = old_value
+        new_list_value = new_value_in_original_type(old_value[loc], k, v) # ALERT: Recursion here!
+        new_list[loc] = new_list_value
+        new_value = new_list
     else:
         new_value = v
     return new_value
@@ -111,12 +117,13 @@ def obtain_param_positions_bounds_dict(dataframes_dict: dict[str, pd.DataFrame])
         for i in range(df.shape[1]):
             print(f"Column {i}")
             print(f'type(df[{i}][0]): {type(df[i][0])}')
-            if not isinstance(df[i][0], dict):  # Number or str
+            if isinstance(df[i][0], Number) or isinstance(df[i][0], str):
                 golden_key = str(key_string+'_pos_'+str(i))
                 print(f"golden_key: {golden_key}")
                 param_positions_bounds_dict[golden_key] = obtain_min_max_from_series(df[i], golden_key)
                 print(f"min, max: {param_positions_bounds_dict[golden_key]}")
-            else:   # dict
+            elif isinstance(df[i][0], dict):
+                print("In Dict")
                 dict_df = pd.json_normalize(df[i].to_list())
                 for key in dict_df.keys():
                     print(f"Key: {key}")
@@ -125,6 +132,17 @@ def obtain_param_positions_bounds_dict(dataframes_dict: dict[str, pd.DataFrame])
                     print(f"golden_key: {golden_key}")
                     param_positions_bounds_dict[golden_key] = obtain_min_max_from_series(dict_df[key], golden_key)
                     print(f"min, max: {param_positions_bounds_dict[golden_key]}")
+            elif isinstance(df[i][0], list):
+                print("In List")
+                list_df = pd.DataFrame(df[i].to_list())
+                for col in range(list_df.shape[1]):
+                    print(f"Column {col}")
+                    print(f'type(list_df[{col}][0]): {type(list_df[col][0])}')
+                    if isinstance(list_df[col][0], Number) or isinstance(list_df[col][0], str):
+                        golden_key = str(key_string+'_pos_list_'+str(col)+'_'+str(i))
+                        print(f"golden_key: {golden_key}")
+                        param_positions_bounds_dict[golden_key] = obtain_min_max_from_series(list_df[col], golden_key)
+                        print(f"min, max: {param_positions_bounds_dict[golden_key]}")
     return param_positions_bounds_dict
 
 def obtain_dataframes_from_definitions(definitions: list[Definition]) -> (pd.DataFrame, pd.DataFrame):
