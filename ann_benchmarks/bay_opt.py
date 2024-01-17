@@ -46,6 +46,8 @@ def new_value_in_original_type(old_value, k, v):
     elif isinstance(old_value, dict):
         key = k[k.rindex('key_')+4:k.rindex('_')]
         new_dict = old_value
+        if '_list_' in key:   # To handle the rare case where a dictionary holds a list 
+            key = key[:k.rindex('_list_')]   # Obtain the original key. ALERT: May misbehave if the original dict key has '_list_' in it. 
         new_dict_value = new_value_in_original_type(old_value[key], k, v) # ALERT: Recursion here!
         new_dict[key] = new_dict_value
         new_value = new_dict
@@ -128,10 +130,21 @@ def obtain_param_positions_bounds_dict(dataframes_dict: dict[str, pd.DataFrame])
                 for key in dict_df.keys():
                     print(f"Key: {key}")
                     print(f'type(dict_df[{key}][0]): {type(dict_df[key][0])}')
-                    golden_key = str(key_string+'_pos_key_'+key+'_'+str(i))
-                    print(f"golden_key: {golden_key}")
-                    param_positions_bounds_dict[golden_key] = obtain_min_max_from_series(dict_df[key], golden_key)
-                    print(f"min, max: {param_positions_bounds_dict[golden_key]}")
+                    if not isinstance(dict_df[key][0], list):   
+                        golden_key = str(key_string+'_pos_key_'+key+'_'+str(i))
+                        print(f"golden_key: {golden_key}")
+                        param_positions_bounds_dict[golden_key] = obtain_min_max_from_series(dict_df[key], golden_key)
+                        print(f"min, max: {param_positions_bounds_dict[golden_key]}")
+                    else:   # To handle the rare case where a dictionary holds a list
+                        list_df = pd.DataFrame(dict_df[key].to_list())
+                        for col in range(list_df.shape[1]):
+                            print(f"Column {col}")
+                            print(f'type(list_df[{col}][0]): {type(list_df[col][0])}')
+                            if isinstance(list_df[col][0], Number) or isinstance(list_df[col][0], str):
+                                golden_key = str(key_string+'_pos_key_'+key+'_list_'+str(col)+'_'+str(i))  
+                                print(f"golden_key: {golden_key}")
+                                param_positions_bounds_dict[golden_key] = obtain_min_max_from_series(list_df[col], golden_key)
+                                print(f"min, max: {param_positions_bounds_dict[golden_key]}")
             elif isinstance(df[i][0], list):
                 print("In List")
                 list_df = pd.DataFrame(df[i].to_list())
