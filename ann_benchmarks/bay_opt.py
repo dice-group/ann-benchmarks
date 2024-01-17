@@ -47,7 +47,7 @@ def new_value_in_original_type(old_value, k, v):
         key = k[k.rindex('key_')+4:k.rindex('_')]
         new_dict = old_value
         if '_list_' in key:   # To handle the rare case where a dictionary holds a list 
-            key = key[:k.rindex('_list_')]   # Obtain the original key. ALERT: May misbehave if the original dict key has '_list_' in it. 
+            key = key[:key.rindex('_list_')]   # Obtain the original key. ALERT: May misbehave if the original dict key has '_list_' in it. 
         new_dict_value = new_value_in_original_type(old_value[key], k, v) # ALERT: Recursion here!
         new_dict[key] = new_dict_value
         new_value = new_dict
