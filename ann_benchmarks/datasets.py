@@ -569,17 +569,13 @@ def dbpedia_entities_openai_1M(out_fn, n = None):
 
     write_output(X_train, X_test, out_fn, "angular")
 
-def knowledge_graph(out_fn:str, kg_name:str, kg_embedding_model:str, embedding_dimension:int, distance: str) -> None:
-    filename =  kg_name + '_' + kg_embedding_model + '_' + str(embedding_dimension) + '.csv'
-    dir = 'KG_Embeddings'
-    z_fn = os.path.join('data', dir, filename)
-    X = []
-    file = open(z_fn)
-    file.readline()
-    for line in file:
-        v = [float(x) for x in line.strip().split(',')[1:]]
-        X.append(numpy.array(v))
-    X_train, X_test = train_test_split(numpy.array(X))
+def knowledge_graph(out_fn:str, dice_embeddings_folder_name:str, distance: str) -> None:
+    download_url =  'https://files.dice-research.org/projects/DiceEmbeddings/' + dice_embeddings_folder_name + '/model.pt'
+    download(source_url=download_url, destination_path="./data/KG_Embeddings/model.pt")
+    from torch import load
+    model=load("./data/KG_Embeddings/model.pt")
+    entity_embedding_weights = model['entity_embeddings.weight'].numpy()
+    X_train, X_test = train_test_split(X=entity_embedding_weights, test_size=0.1)
     write_output(X_train, X_test, out_fn, distance)
 
 
@@ -611,12 +607,17 @@ DATASETS: Dict[str, Callable[[str], None]] = {
     "movielens1m-jaccard": movielens1m,
     "movielens10m-jaccard": movielens10m,
     "movielens20m-jaccard": movielens20m,
-    "kg-yago3-10-ntn-32-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10', 'NTN', 32, 'angular'),
-    "kg-yago3-10-keci-32-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10', 'Keci', 32, 'angular'),
-    "kg-umls-keci-32-angular": lambda out_fn: knowledge_graph(out_fn, 'UMLS', 'Keci', 32, 'angular'),
-    "kg-umls-ntn-32-angular": lambda out_fn: knowledge_graph(out_fn, 'UMLS', 'NTN', 32, 'angular'),
-    "kg-wn18-keci-32-angular": lambda out_fn: knowledge_graph(out_fn, 'WN18', 'Keci', 32, 'angular'),
-    "kg-wn18-transe-32-angular": lambda out_fn: knowledge_graph(out_fn, 'WN18', 'TransE', 32, 'angular')
+    "kg-yago3-10-aconex-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10-AConEx-dim128-epoch256-KvsAll', 'angular'),
+    "kg-yago3-10-complex-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10-ComplEx-dim128-epoch256-KvsAll', 'angular'),
+    "kg-yago3-10-convo-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10-ConvO-dim128-epoch256-KvsAll', 'angular'),
+    "kg-yago3-10-convq-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10-ConvQ-dim128-epoch256-KvsAll', 'angular'),
+    "kg-yago3-10-distmult-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10-DistMult-dim128-epoch256-KvsAll', 'angular'),
+    "kg-yago3-10-keci-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10-Keci-dim128-epoch256-KvsAll', 'angular'),
+    "kg-yago3-10-omult-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10-OMult-dim128-epoch256-KvsAll', 'angular'),
+    "kg-yago3-10-pykeen-mure-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10-Pykeen_MuRE-dim128-epoch256-KvsAll', 'angular'),
+    "kg-yago3-10-pykeen-quate-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10-Pykeen_QuatE-dim128-epoch256-KvsAll', 'angular'),
+    "kg-yago3-10-pykeen-rotate-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10-Pykeen_RotatE-dim128-epoch256-KvsAll', 'angular'),
+    "kg-yago3-10-qmult-angular": lambda out_fn: knowledge_graph(out_fn, 'YAGO3-10-QMult-dim128-epoch256-KvsAll', 'angular'),
 }
 
 DATASETS.update({
