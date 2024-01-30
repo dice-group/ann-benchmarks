@@ -1,12 +1,14 @@
-from bayes_opt import BayesianOptimization
 import argparse
-import numpy as np
 from ann_benchmarks.plotting.utils import compute_metrics_all_runs
 from ann_benchmarks.results import build_result_filepath, move_result_to_bay_opt_dir, load_a_result
 from ann_benchmarks.definitions import Definition
 from numbers import Number
 from ann_benchmarks.datasets import DATASETS, get_dataset
 import pandas as pd
+import math
+
+from bayes_opt import BayesianOptimization
+from copy import copy
 
 str_dict = {}
 
@@ -64,12 +66,14 @@ def new_value_in_original_type(old_value, k, v):
 def set_params(definition: Definition, new_params: dict):
     # Replace the values obtained from the optimizer in their original positions 
     print(f"In set_params")
+    print(f"Original arguments: {definition.arguments}")
+    print(f"Original query arguments: {definition.query_argument_groups}")
     arguments_list = None
     query_arguments_list = None
     if len(definition.arguments) > 0:
-        arguments_list = [None] * len(definition.arguments)
+        arguments_list = copy(definition.arguments)
     if len(definition.query_argument_groups) > 0:
-        query_arguments_list = [None] * len(definition.query_argument_groups[0])
+        query_arguments_list = copy(definition.query_argument_groups[0])
         
     for _, (k,v) in enumerate(new_params.items()):
         print(f"k: {k}")
@@ -120,6 +124,9 @@ def obtain_param_positions_bounds_dict(dataframes_dict: dict[str, pd.DataFrame])
             print(f"Column {i}")
             print(f'type(df[{i}][0]): {type(df[i][0])}')
             if isinstance(df[i][0], Number) or isinstance(df[i][0], str):
+                # Skip, if NaN
+                if math.isnan(df[i][0]):
+                    continue
                 golden_key = str(key_string+'_pos_'+str(i))
                 print(f"golden_key: {golden_key}")
                 param_positions_bounds_dict[golden_key] = obtain_min_max_from_series(df[i], golden_key)
