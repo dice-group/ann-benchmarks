@@ -123,10 +123,16 @@ def obtain_param_positions_bounds_dict(dataframes_dict: dict[str, pd.DataFrame])
         for i in range(df.shape[1]):
             print(f"Column {i}")
             print(f'type(df[{i}][0]): {type(df[i][0])}')
-            if isinstance(df[i][0], Number) or isinstance(df[i][0], str):
+            if isinstance(df[i][0], Number):
                 # Skip, if NaN
                 if math.isnan(df[i][0]):
+                    print(f"NaN Value!")
                     continue
+                golden_key = str(key_string+'_pos_'+str(i))
+                print(f"golden_key: {golden_key}")
+                param_positions_bounds_dict[golden_key] = obtain_min_max_from_series(df[i], golden_key)
+                print(f"min, max: {param_positions_bounds_dict[golden_key]}")
+            elif isinstance(df[i][0], str):
                 golden_key = str(key_string+'_pos_'+str(i))
                 print(f"golden_key: {golden_key}")
                 param_positions_bounds_dict[golden_key] = obtain_min_max_from_series(df[i], golden_key)
