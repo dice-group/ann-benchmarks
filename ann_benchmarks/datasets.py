@@ -576,7 +576,7 @@ def knowledge_graph(out_fn:str, dice_embeddings_name:str, distance: str) -> None
     from torch import load
     model=load(model_path)
     entity_embedding_weights = model['entity_embeddings.weight'].numpy()
-    X_train, X_test = train_test_split(X=entity_embedding_weights, test_size=0.1)
+    X_train, X_test = train_test_split(X=entity_embedding_weights)
     write_output(X_train, X_test, out_fn, distance)
 
 
