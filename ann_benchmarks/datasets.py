@@ -569,11 +569,12 @@ def dbpedia_entities_openai_1M(out_fn, n = None):
 
     write_output(X_train, X_test, out_fn, "angular")
 
-def knowledge_graph(out_fn:str, dice_embeddings_folder_name:str, distance: str) -> None:
-    download_url =  'https://files.dice-research.org/projects/DiceEmbeddings/' + dice_embeddings_folder_name + '/model.pt'
-    download(source_url=download_url, destination_path="./data/KG_Embeddings/model.pt")
+def knowledge_graph(out_fn:str, dice_embeddings_name:str, distance: str) -> None:
+    download_url =  'https://files.dice-research.org/projects/DiceEmbeddings/' + dice_embeddings_name + '/model.pt'
+    model_path = './data/KG_Embeddings/' + dice_embeddings_name + '_model.pt'
+    download(source_url=download_url, destination_path=model_path)
     from torch import load
-    model=load("./data/KG_Embeddings/model.pt")
+    model=load(model_path)
     entity_embedding_weights = model['entity_embeddings.weight'].numpy()
     X_train, X_test = train_test_split(X=entity_embedding_weights, test_size=0.1)
     write_output(X_train, X_test, out_fn, distance)
