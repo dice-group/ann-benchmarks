@@ -6,6 +6,7 @@ from numbers import Number
 from ann_benchmarks.datasets import DATASETS, get_dataset
 import pandas as pd
 import math
+from random import randrange
 
 from bayes_opt import BayesianOptimization
 from copy import copy
@@ -184,15 +185,14 @@ def obtain_dataframes_from_definitions(definitions: list[Definition]) -> (pd.Dat
     query_args_df = pd.DataFrame(query_args_list)
     return args_df, query_args_df
 
-def run_using_bayesian_optimizer(definition: Definition, args: argparse.Namespace, param_positions_bounds_dict: dict[str, tuple]):
+def run_using_bayesian_optimizer(definition: Definition, args: argparse.Namespace, param_positions_bounds_dict: dict[str, tuple], random_seed):
     # param_positions_bounds_dict = {'args_pos_1': (10, 1000), 'query_args_pos_0': (10, 60), 'query_args_pos_1': (70, 120)}
     # TODO: Remove print statements after testing.
     # pbounds = create_parameter_bounds_from(param_positions_bounds_dict)
     # print(f"Parameter Bounds are: {pbounds}")
     print(f"Parameter Bounds are: {param_positions_bounds_dict}")
-    random_state=42
-    init_points=3
-    n_iter=7
+    init_points=2
+    n_iter=5
     def black_box_function(**kwargs):
         """Function with unknown internals we wish to maximize."""
         new_params = kwargs
@@ -218,7 +218,7 @@ def run_using_bayesian_optimizer(definition: Definition, args: argparse.Namespac
         f=black_box_function, # Function to be evaluated
         # pbounds=pbounds, # Bounded region of parameter space
         pbounds=param_positions_bounds_dict, # Bounded region of parameter space
-        random_state=random_state,
+        random_state=random_seed,
         allow_duplicate_points=True
     )
     optimizer.maximize( # Choose the parameters which maximize the function value
@@ -238,7 +238,18 @@ def execute_using_bayesian_optimizer(bay_opt_definitions: list[Definition], args
     param_positions_bounds_dict = obtain_param_positions_bounds_dict({'args': args_df, 'query_args': query_args_df})
     print(f'param_positions_bounds_dict: {param_positions_bounds_dict}')
     print(f'str_dict: {str_dict}')
-    run_using_bayesian_optimizer(bay_opt_definitions[0], args, param_positions_bounds_dict)
+    no_of_runs = args.runs
+    print(f'no_of_runs: {no_of_runs}')
+    random_seeds = [42, 1, 0, 123, -1]
+    for iteration in range(no_of_runs):
+        print(f'Iteration : {iteration}')
+        try:
+            random_seed_value = random_seeds[iteration]
+        except:
+            random_seed_value = randrange(-111,111)
+        print(f'Random Seed Value : {random_seed_value}')
+        args.runs = 1
+        run_using_bayesian_optimizer(bay_opt_definitions[0], args, param_positions_bounds_dict, random_seed_value)
     
 
 
