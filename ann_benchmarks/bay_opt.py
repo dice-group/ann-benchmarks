@@ -6,7 +6,7 @@ from numbers import Number
 from ann_benchmarks.datasets import DATASETS, get_dataset
 import pandas as pd
 import math
-from random import randrange
+from random import randint
 
 from bayes_opt import BayesianOptimization
 from copy import copy
@@ -240,13 +240,9 @@ def execute_using_bayesian_optimizer(bay_opt_definitions: list[Definition], args
     print(f'str_dict: {str_dict}')
     no_of_runs = args.runs
     print(f'no_of_runs: {no_of_runs}')
-    random_seeds = [42, 1, 0, 123, -1]
     for iteration in range(no_of_runs):
         print(f'Iteration : {iteration}')
-        try:
-            random_seed_value = random_seeds[iteration]
-        except:
-            random_seed_value = randrange(-111,111)
+        random_seed_value = randint(0, 2**32 - 1)   # Seed must be between 0 and 2**32 - 1 to avoid exception
         print(f'Random Seed Value : {random_seed_value}')
         args.runs = 1
         run_using_bayesian_optimizer(bay_opt_definitions[0], args, param_positions_bounds_dict, random_seed_value)
