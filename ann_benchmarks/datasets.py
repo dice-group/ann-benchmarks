@@ -199,6 +199,57 @@ def train_test_split(X: numpy.ndarray, test_size: int = 10000, dimension: int = 
     print(f"Splitting {X.shape[0]}*{dimension} into train/test")
     return sklearn_train_test_split(X, test_size=test_size, random_state=1)
 
+def generate_test_data_using(X: numpy.ndarray, test_size: int = 0) -> numpy.ndarray:
+    if test_size == 0:
+        test_size = X.shape[0]
+
+    absolute_distance_cube = numpy.zeros((X.shape[0], X.shape[0], X.shape[1]))
+
+    # Create a cube of shape (x, y, z) = (X.shape[0], X.shape[0], X.shape[1])
+    # where each matrix corresponds to the absolute distance between the reference point (given by x)
+    # and other points (given by y) in each dimension of embedding space (given by z)
+    for reference_point_loc in range(X.shape[0]):
+        absolute_distance_matrix = numpy.zeros((X.shape[0], X.shape[1]))
+        for compare_point_loc in range(X.shape[0]):
+            absolute_distance_matrix[compare_point_loc] = numpy.abs(numpy.array(X[reference_point_loc]) - numpy.array(X[compare_point_loc]))
+        absolute_distance_cube[reference_point_loc] = absolute_distance_matrix
+
+    # Create matrices of shape (x, y) = (X.shape[0], X.shape[1]) to store average absolute
+    # distances and standard deviation on absolute distances in every dimension of
+    # embedding space (given by y) for each point in X (given by x)
+    average_absolute_distance_matrix = numpy.zeros((X.shape[0], X.shape[1]))
+    absolute_distance_standard_deviation_matrix = numpy.zeros((X.shape[0], X.shape[1]))
+    for reference_point_loc in range(X.shape[0]):
+        transposed_absolute_distance_matrix = numpy.transpose(absolute_distance_cube[reference_point_loc])
+        for dimension in range(X.shape[1]):
+            average_absolute_distance_matrix[reference_point_loc][dimension] = numpy.average(transposed_absolute_distance_matrix[dimension])
+        absolute_distance_standard_deviation_matrix[reference_point_loc] = numpy.std(transposed_absolute_distance_matrix, axis=1)
+
+    # Sample from a Gaussian Distributions whose (mean, standard deviation)
+    # are equal to the above calculated (average_absolute_distance_matrix, absolute_distance_standard_deviation_matrix)
+    # for each point, dimension pair (x,y).
+    # Add/Subtract (chosen randomly) these sampled values from the actual embeddings (X) to obtain test dataset.
+    # Return the test dataset once the required `test_size` is reached.
+    test_data = []
+    current_test_data_size = 0
+    while current_test_data_size < test_size:
+        random_samples = numpy.random.normal(loc=average_absolute_distance_matrix,
+                                             scale=absolute_distance_standard_deviation_matrix,
+                                             size=average_absolute_distance_matrix.shape)
+        random_operator = random.randint(0,1)
+        if random_operator == 0:
+            to_be_test_dataset = X + random_samples
+        elif random_operator == 1:
+            to_be_test_dataset = X - random_samples
+
+        if (test_size - current_test_data_size) >= to_be_test_dataset.shape[0]:
+            test_data.append(to_be_test_dataset)
+            current_test_data_size += to_be_test_dataset.shape[0]
+        else:
+            test_data.append(to_be_test_dataset[:(test_size - current_test_data_size)])
+            current_test_data_size += to_be_test_dataset[:(test_size - current_test_data_size)].shape[0]
+
+    return numpy.array(test_data)
 
 def glove(out_fn: str, d: int) -> None:
     import zipfile
@@ -576,7 +627,8 @@ def knowledge_graph(out_fn:str, dice_embeddings_name:str, distance: str) -> None
     from torch import load
     model=load(model_path)
     entity_embedding_weights = model['entity_embeddings.weight'].numpy()
-    X_train, X_test = train_test_split(X=entity_embedding_weights)
+    X_train = entity_embedding_weights
+    X_test = generate_test_data_using(X_train)
     write_output(X_train, X_test, out_fn, distance)
 
 
