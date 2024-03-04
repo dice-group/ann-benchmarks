@@ -202,25 +202,17 @@ def train_test_split(X: numpy.ndarray, test_size: int = 10000, dimension: int = 
 def generate_test_data_using(X: numpy.ndarray, test_size: int = 0) -> numpy.ndarray:
     if test_size == 0:
         test_size = X.shape[0]
-
-    absolute_distance_cube = numpy.zeros((X.shape[0], X.shape[0], X.shape[1]))
-
-    # Create a cube of shape (x, y, z) = (X.shape[0], X.shape[0], X.shape[1])
-    # where each matrix corresponds to the absolute distance between the reference point (given by x)
-    # and other points (given by y) in each dimension of embedding space (given by z)
-    for reference_point_loc in range(X.shape[0]):
-        absolute_distance_matrix = numpy.zeros((X.shape[0], X.shape[1]))
-        for compare_point_loc in range(X.shape[0]):
-            absolute_distance_matrix[compare_point_loc] = numpy.abs(numpy.array(X[reference_point_loc]) - numpy.array(X[compare_point_loc]))
-        absolute_distance_cube[reference_point_loc] = absolute_distance_matrix
-
+        
     # Create matrices of shape (x, y) = (X.shape[0], X.shape[1]) to store average absolute
     # distances and standard deviation on absolute distances in every dimension of
     # embedding space (given by y) for each point in X (given by x)
     average_absolute_distance_matrix = numpy.zeros((X.shape[0], X.shape[1]))
     absolute_distance_standard_deviation_matrix = numpy.zeros((X.shape[0], X.shape[1]))
     for reference_point_loc in range(X.shape[0]):
-        transposed_absolute_distance_matrix = numpy.transpose(absolute_distance_cube[reference_point_loc])
+        absolute_distance_matrix = numpy.zeros((X.shape[0], X.shape[1]))
+        for compare_point_loc in range(X.shape[0]):
+            absolute_distance_matrix[compare_point_loc] = numpy.abs(numpy.array(X[reference_point_loc]) - numpy.array(X[compare_point_loc]))
+        transposed_absolute_distance_matrix = numpy.transpose(absolute_distance_matrix)
         for dimension in range(X.shape[1]):
             average_absolute_distance_matrix[reference_point_loc][dimension] = numpy.average(transposed_absolute_distance_matrix[dimension])
         absolute_distance_standard_deviation_matrix[reference_point_loc] = numpy.std(transposed_absolute_distance_matrix, axis=1)
@@ -235,7 +227,7 @@ def generate_test_data_using(X: numpy.ndarray, test_size: int = 0) -> numpy.ndar
     while current_test_data_size < test_size:
         random_samples = numpy.random.normal(loc=average_absolute_distance_matrix,
                                              scale=absolute_distance_standard_deviation_matrix,
-                                             size=average_absolute_distance_matrix.shape)
+                                             size=X.shape)
         random_operator = random.randint(0,1)
         if random_operator == 0:
             to_be_test_dataset = X + random_samples
