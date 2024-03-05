@@ -200,34 +200,49 @@ def train_test_split(X: numpy.ndarray, test_size: int = 10000, dimension: int = 
     return sklearn_train_test_split(X, test_size=test_size, random_state=1)
 
 def generate_test_dataset_using(X: numpy.ndarray) -> numpy.ndarray:
-    # Create matrices of shape (x, y) = (X.shape[0], X.shape[1]) to store average absolute
-    # distances and standard deviation on absolute distances in every dimension of
-    # embedding space (given by y) for each point in X (given by x)
-    average_absolute_distance_matrix = numpy.zeros((X.shape[0], X.shape[1]))
-    absolute_distance_standard_deviation_matrix = numpy.zeros((X.shape[0], X.shape[1]))
-    for reference_point_loc in range(X.shape[0]):
+    # Create matrices to store average absolute distances and 1-standard deviation on absolute distances 
+    # in every dimension of embedding space for randomly selected nodes from X
+    random_node_list_length = int(0.3 * X.shape[0])
+    random_node_numbers = []
+    i = 0
+    while i in range(random_node_list_length):
+        random_node_number = random.randint(0, X.shape[0]-1)
+        random_node_numbers.append(random_node_number)
+        i+=1
+    assert len(random_node_numbers) == random_node_list_length
+
+    # average_absolute_distance_matrix = numpy.zeros((X.shape[0], X.shape[1]))
+    # absolute_distance_standard_deviation_matrix = numpy.zeros((X.shape[0], X.shape[1]))
+    average_absolute_distance_matrix = []
+    absolute_distance_standard_deviation_matrix = []
+    for reference_point_loc in random_node_numbers:
         absolute_distance_matrix = numpy.zeros((X.shape[0], X.shape[1]))
+        # absolute_distance_matrix = []
         for compare_point_loc in range(X.shape[0]):
             absolute_distance_matrix[compare_point_loc] = numpy.abs(numpy.array(X[reference_point_loc]) - numpy.array(X[compare_point_loc]))
+            # absolute_distance_matrix.append(numpy.abs(numpy.array(X[reference_point_loc]) - numpy.array(X[compare_point_loc])))
         transposed_absolute_distance_matrix = numpy.transpose(absolute_distance_matrix)
-        for dimension in range(X.shape[1]):
-            average_absolute_distance_matrix[reference_point_loc][dimension] = numpy.average(transposed_absolute_distance_matrix[dimension])
-        absolute_distance_standard_deviation_matrix[reference_point_loc] = numpy.std(transposed_absolute_distance_matrix, axis=1)
+        # for dimension in range(X.shape[1]):
+        #     average_absolute_distance_matrix[reference_point_loc][dimension] = numpy.average(transposed_absolute_distance_matrix[dimension])
+        # absolute_distance_standard_deviation_matrix[reference_point_loc] = numpy.std(transposed_absolute_distance_matrix, axis=1)
+        average_absolute_distance_matrix.append(numpy.average(transposed_absolute_distance_matrix, axis=1))
+        absolute_distance_standard_deviation_matrix.append(numpy.std(transposed_absolute_distance_matrix, axis=1))
 
-    # Sample from a Gaussian Distributions whose (mean, standard deviation)
-    # are equal to the above calculated (average_absolute_distance_matrix, absolute_distance_standard_deviation_matrix)
-    # for each point, dimension pair (x,y).
-    # Add/Subtract (chosen randomly) these sampled values from the actual embeddings (X) to obtain test dataset.
-    random_samples = numpy.random.normal(loc=average_absolute_distance_matrix,
-                                            scale=absolute_distance_standard_deviation_matrix,
-                                            size=X.shape)
-    random_operator = random.randint(0,1)
-    if random_operator == 0:
-        test_dataset = X + random_samples
-    elif random_operator == 1:
-        test_dataset = X - random_samples
+    # Sample from a Gaussian Distributions whose (mean, standard deviation) are equal to the
+    # above calculated (average_absolute_distance_matrix, absolute_distance_standard_deviation_matrix).
+    # Add/Subtract these sampled values to/from the actual embeddings (X) to obtain test dataset.
+    random_samples = numpy.random.normal(loc=numpy.array(average_absolute_distance_matrix),
+                                            scale=numpy.array(absolute_distance_standard_deviation_matrix),
+                                            size=numpy.array(average_absolute_distance_matrix).shape)
+    test_dataset=[]
+    for idx, node_number in enumerate(random_node_numbers):
+        random_operator = random.randint(0,1)
+        if random_operator == 0:
+            test_dataset.append(X[node_number] + random_samples[idx])
+        elif random_operator == 1:
+            test_dataset.append(X[node_number] - random_samples[idx])
 
-    return test_dataset
+    return numpy.array(test_dataset)
 
 def glove(out_fn: str, d: int) -> None:
     import zipfile
