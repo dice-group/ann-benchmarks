@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import numpy as np
-
+import math
 
 def knn_threshold(data, count, epsilon):
     return data[count - 1] + epsilon
@@ -202,5 +202,14 @@ all_metrics = {
         )
         / queries_per_second(true_distances, run_attrs),  # noqa
         "worst": float("inf"),
+    },
+    "logrecall": {
+        "description": "log(Recall)",
+        "function": lambda true_distances, run_distances, metrics, times, run_attrs: math.log(knn(
+            true_distances, run_distances, run_attrs["count"], metrics
+        ).attrs[
+            "mean"
+        ]),  # noqa
+        "worst": float("-inf"),
     },
 }
