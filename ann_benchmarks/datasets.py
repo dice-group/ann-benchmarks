@@ -202,7 +202,7 @@ def train_test_split(X: numpy.ndarray, test_size: int = 10000, dimension: int = 
 def generate_test_dataset_using(X: numpy.ndarray) -> numpy.ndarray:
     # Create matrices to store average absolute distances and 1-standard deviation on absolute distances 
     # in every dimension of embedding space for randomly selected nodes from X
-    random_node_bucket_size = int(0.3 * X.shape[0])
+    random_node_bucket_size = int(0.1 * X.shape[0])
     random_node_bucket = []
     i = 0
     while i in range(random_node_bucket_size):
