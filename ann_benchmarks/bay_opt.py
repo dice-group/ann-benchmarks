@@ -244,7 +244,6 @@ def execute_using_bayesian_optimizer(bay_opt_definitions: list[Definition], args
         print(f'Iteration : {iteration}')
         random_seed_value = randint(0, 2**32 - 1)   # Seed must be between 0 and 2**32 - 1 to avoid exception
         print(f'Random Seed Value : {random_seed_value}')
-        args.runs = 1
         run_using_bayesian_optimizer(bay_opt_definitions[0], args, param_positions_bounds_dict, random_seed_value)
     
 
