@@ -1,6 +1,5 @@
 all_plot_variants = {
     "recall/time": ("k-nn", "qps"),
-    "logrecall/time": ("logrecall", "qps"),
     "recall/buildtime": ("k-nn", "build"),
     "recall/indexsize": ("k-nn", "indexsize"),
     "recall/distcomps": ("k-nn", "distcomps"),
