@@ -238,7 +238,7 @@ def execute_using_bayesian_optimizer(bay_opt_definitions: list[Definition], args
     param_positions_bounds_dict = obtain_param_positions_bounds_dict({'args': args_df, 'query_args': query_args_df})
     print(f'param_positions_bounds_dict: {param_positions_bounds_dict}')
     print(f'str_dict: {str_dict}')
-    no_of_runs = args.runs
+    no_of_runs = 5  # default no. of args.runs
     print(f'no_of_runs: {no_of_runs}')
     for iteration in range(no_of_runs):
         print(f'Iteration : {iteration}')
