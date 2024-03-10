@@ -682,7 +682,7 @@ DATASETS: Dict[str, Callable[[str], None]] = {
     "kg-fb15k-237-complex-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-ComplEx-dim128-epoch256-KvsAll", "euclidean"),
     "kg-fb15k-237-convo-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-ConvO-dim128-epoch256-KvsAll", "euclidean"),
     "kg-fb15k-237-convq-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-ConvQ-dim128-epoch256-KvsAll", "euclidean"),
-    "kg-fb15k-237-distmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-DistMult-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-fb15k-237-distmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-DistMult-dim128-epoch256", "euclidean"),
     "kg-fb15k-237-keci-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-Keci-dim128-epoch256-KvsAll", "euclidean"),
     "kg-fb15k-237-omult-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-OMult-dim128-epoch256-KvsAll", "euclidean"),
     "kg-fb15k-237-pykeen-quate-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-Pykeen_QuatE-dim128-epoch256-KvsAll", "euclidean"),
