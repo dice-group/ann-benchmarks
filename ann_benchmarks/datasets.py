@@ -664,7 +664,7 @@ DATASETS: Dict[str, Callable[[str], None]] = {
     "kg-yago3-10-complex-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-ComplEx-dim128-epoch256-KvsAll", "euclidean"),
     "kg-yago3-10-convo-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-ConvO-dim128-epoch256-KvsAll", "euclidean"),
     "kg-yago3-10-convq-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-ConvQ-dim128-epoch256-KvsAll", "euclidean"),
-    "kg-yago3-10-distmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-DistMult-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-yago3-10-distmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-DistMult-dim128-epoch256-KvsAl", "euclidean"),
     "kg-yago3-10-keci-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-Keci-dim128-epoch256-KvsAll", "euclidean"),
     "kg-yago3-10-omult-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-OMult-dim128-epoch256-KvsAll", "euclidean"),
     "kg-yago3-10-qmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-QMult-dim128-epoch256-KvsAll", "euclidean"),
