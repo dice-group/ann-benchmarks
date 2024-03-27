@@ -14,7 +14,7 @@ def build_result_filepath(dataset_name: Optional[str] = None,
                           count: Optional[int] = None, 
                           definition: Optional[Definition] = None, 
                           query_arguments: Optional[Any] = None, 
-                          batch_mode: bool = False) -> str:
+                          batch_mode: bool = True) -> str:
     """
     Constructs the filepath for storing the results.
 
@@ -74,7 +74,7 @@ def store_results(dataset_name: str, count: int, definition: Definition, query_a
 
 def load_all_results(dataset: Optional[str] = None, 
                  count: Optional[int] = None, 
-                 batch_mode: bool = False) -> Iterator[Tuple[dict, h5py.File]]:
+                 batch_mode: bool = True) -> Iterator[Tuple[dict, h5py.File]]:
     """
     Loads all the results from the HDF5 files in the specified path.
 
