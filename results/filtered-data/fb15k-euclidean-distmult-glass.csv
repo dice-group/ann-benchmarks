@@ -1,0 +1,2 @@
+"algorithm","parameters","count","k-nn","epsilon","largeepsilon","rel","qps","p50","p95","p99","p999","distcomps","build","candidates","indexsize","queriessize","dataset"
+"glass","glass_({'L': 200, 'R': 19, 'level': 1})","10","0","0","0","inf","525643.683502833","0.00190242940334429","0.00190242940334429","0.00190242940334429","0.00190242940334429","0","0.8633713722229","0","11044","0.0210104303478051","kg-fb15k-237-distmult-euclidean"

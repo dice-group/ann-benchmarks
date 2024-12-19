@@ -1,0 +1,2 @@
+"algorithm","parameters","count","k-nn","epsilon","largeepsilon","rel","qps","p50","p95","p99","p999","distcomps","build","candidates","indexsize","queriessize","dataset"
+"bruteforce-blas","BruteForceBLAS()","10","1","1","1","0.0913954780628534","1518.24755042182","0.658654142171145","0.658654142171145","0.658654142171145","0.658654142171145","0","0.0117270946502686","10","28944","19.0640847679672","kg-fb15k-237-pykeen-quate-angular"

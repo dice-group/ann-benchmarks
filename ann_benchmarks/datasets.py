@@ -199,6 +199,48 @@ def train_test_split(X: numpy.ndarray, test_size: int = 10000, dimension: int = 
     print(f"Splitting {X.shape[0]}*{dimension} into train/test")
     return sklearn_train_test_split(X, test_size=test_size, random_state=1)
 
+def generate_test_dataset_using(X: numpy.ndarray) -> numpy.ndarray:
+    # Create matrices to store average absolute distances and 1-standard deviation on absolute distances 
+    # in every dimension of embedding space for randomly selected nodes from X
+    print(f"Generating test dataset from training dataset")
+    random_node_list_size = int(0.1 * X.shape[0])
+    random_node_list = []
+    i = 0
+    while i in range(random_node_list_size):
+        random_node_number = random.randint(0, X.shape[0]-1)
+        random_node_list.append(random_node_number)
+        i+=1
+    assert len(random_node_list) == random_node_list_size
+    print(f"Generating test dataset from random node numbers: {random_node_list}")
+
+    # average_absolute_distance_matrix = numpy.zeros((X.shape[0], X.shape[1]))
+    # absolute_distance_standard_deviation_matrix = numpy.zeros((X.shape[0], X.shape[1]))
+    average_absolute_distance_matrix = []
+    absolute_distance_standard_deviation_matrix = []
+    for reference_point_loc in random_node_list:
+        absolute_distance_matrix = []
+        for compare_point_loc in random_node_list:
+            absolute_distance_matrix.append(numpy.abs(numpy.array(X[reference_point_loc]) - numpy.array(X[compare_point_loc])))
+        transposed_absolute_distance_matrix = numpy.transpose(absolute_distance_matrix)
+        average_absolute_distance_matrix.append(numpy.average(transposed_absolute_distance_matrix, axis=1))
+        absolute_distance_standard_deviation_matrix.append(numpy.std(transposed_absolute_distance_matrix, axis=1))
+
+    # Sample from a Gaussian Distributions whose (mean, standard deviation) are equal to the
+    # above calculated (average_absolute_distance_matrix, absolute_distance_standard_deviation_matrix).
+    # Add/Subtract these sampled values to/from the actual embeddings (X) to obtain test dataset.
+    random_samples = numpy.random.normal(loc=numpy.array(average_absolute_distance_matrix),
+                                            scale=numpy.array(absolute_distance_standard_deviation_matrix),
+                                            size=numpy.array(average_absolute_distance_matrix).shape)
+    test_dataset=[]
+    for idx, node_number in enumerate(random_node_list):
+        random_operator = random.randint(0,1)
+        if random_operator == 0:
+            test_dataset.append(X[node_number] + random_samples[idx])
+        elif random_operator == 1:
+            test_dataset.append(X[node_number] - random_samples[idx])
+
+    print(f"Generated test dataset of shape {numpy.array(test_dataset).shape} from training dataset of shape {X.shape}")
+    return numpy.array(test_dataset)
 
 def glove(out_fn: str, d: int) -> None:
     import zipfile
@@ -569,6 +611,17 @@ def dbpedia_entities_openai_1M(out_fn, n = None):
 
     write_output(X_train, X_test, out_fn, "angular")
 
+def knowledge_graph(out_fn:str, dice_embeddings_name:str, distance: str) -> None:
+    download_url =  'https://files.dice-research.org/projects/DiceEmbeddings/' + dice_embeddings_name + '/model.pt'
+    model_path = './data/KG_Embeddings/' + dice_embeddings_name + '_model.pt'
+    download(source_url=download_url, destination_path=model_path)
+    from torch import load
+    model=load(model_path)
+    entity_embedding_weights = model['entity_embeddings.weight'].numpy()
+    X_train = entity_embedding_weights
+    X_test = generate_test_dataset_using(X_train)
+    write_output(X_train, X_test, out_fn, distance)
+
 
 DATASETS: Dict[str, Callable[[str], None]] = {
     "deep-image-96-angular": deep_image,
@@ -598,6 +651,78 @@ DATASETS: Dict[str, Callable[[str], None]] = {
     "movielens1m-jaccard": movielens1m,
     "movielens10m-jaccard": movielens10m,
     "movielens20m-jaccard": movielens20m,
+    "kg-yago3-10-aconex-angular": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-AConEx-dim128-epoch256-KvsAll", "angular"),
+    "kg-yago3-10-complex-angular": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-ComplEx-dim128-epoch256-KvsAll", "angular"),
+    "kg-yago3-10-convo-angular": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-ConvO-dim128-epoch256-KvsAll", "angular"),
+    "kg-yago3-10-convq-angular": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-ConvQ-dim128-epoch256-KvsAll", "angular"),
+    "kg-yago3-10-distmult-angular": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-DistMult-dim128-epoch256-KvsAl", "angular"),
+    "kg-yago3-10-keci-angular": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-Keci-dim128-epoch256-KvsAll", "angular"),
+    "kg-yago3-10-omult-angular": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-OMult-dim128-epoch256-KvsAll", "angular"),
+    "kg-yago3-10-qmult-angular": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-QMult-dim128-epoch256-KvsAll", "angular"),
+    "kg-yago3-10-pykeen-quate-angular": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-Pykeen_QuatE-dim128-epoch256-KvsAll", "angular"),
+    "kg-yago3-10-aconex-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-AConEx-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-yago3-10-complex-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-ComplEx-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-yago3-10-convo-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-ConvO-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-yago3-10-convq-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-ConvQ-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-yago3-10-distmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-DistMult-dim128-epoch256-KvsAl", "euclidean"),
+    "kg-yago3-10-keci-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-Keci-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-yago3-10-omult-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-OMult-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-yago3-10-qmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-QMult-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-yago3-10-pykeen-quate-euclidean": lambda out_fn: knowledge_graph(out_fn, "YAGO3-10-Pykeen_QuatE-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-fb15k-237-aconex-angular": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-AConEx-dim128-epoch256-KvsAll", "angular"),
+    "kg-fb15k-237-complex-angular": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-ComplEx-dim128-epoch256-KvsAll", "angular"),
+    "kg-fb15k-237-convo-angular": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-ConvO-dim128-epoch256-KvsAll", "angular"),
+    "kg-fb15k-237-convq-angular": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-ConvQ-dim128-epoch256-KvsAll", "angular"),
+    "kg-fb15k-237-distmult-angular": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-DistMult-dim128-epoch256", "angular"),
+    "kg-fb15k-237-keci-angular": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-Keci-dim128-epoch256-KvsAll", "angular"),
+    "kg-fb15k-237-omult-angular": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-OMult-dim128-epoch256-KvsAll", "angular"),
+    "kg-fb15k-237-pykeen-quate-angular": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-Pykeen_QuatE-dim128-epoch256-KvsAll", "angular"),
+    "kg-fb15k-237-qmult-angular": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-QMult-dim128-epoch256-KvsAll", "angular"),
+    "kg-fb15k-237-aconex-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-AConEx-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-fb15k-237-complex-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-ComplEx-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-fb15k-237-convo-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-ConvO-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-fb15k-237-convq-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-ConvQ-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-fb15k-237-distmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-DistMult-dim128-epoch256", "euclidean"),
+    "kg-fb15k-237-keci-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-Keci-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-fb15k-237-omult-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-OMult-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-fb15k-237-pykeen-quate-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-Pykeen_QuatE-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-fb15k-237-qmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "FB15k-237-QMult-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-nell-995-h25-aconex-angular": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-AConEx-dim128-epoch256-KvsAll", "angular"),
+    "kg-nell-995-h25-complex-angular": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-ComplEx-dim128-epoch256-KvsAll", "angular"),
+    "kg-nell-995-h25-convo-angular": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-ConvO-dim128-epoch256-KvsAll", "angular"),
+    "kg-nell-995-h25-convq-angular": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-ConvQ-dim128-epoch256-KvsAll", "angular"),
+    "kg-nell-995-h25-distmult-angular": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-DistMult-dim128-epoch256-KvsAll", "angular"),
+    "kg-nell-995-h25-keci-angular": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-Keci-dim128-epoch256-KvsAll", "angular"),
+    "kg-nell-995-h25-omult-angular": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-OMult-dim128-epoch256-KvsAll", "angular"),
+    "kg-nell-995-h25-pykeen-quate-angular": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-Pykeen_QuatE-dim128-epoch256-KvsAll", "angular"),
+    "kg-nell-995-h25-qmult-angular": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-QMult-dim128-epoch256-KvsAll", "angular"),
+    "kg-nell-995-h25-aconex-euclidean": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-AConEx-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-nell-995-h25-complex-euclidean": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-ComplEx-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-nell-995-h25-convo-euclidean": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-ConvO-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-nell-995-h25-convq-euclidean": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-ConvQ-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-nell-995-h25-distmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-DistMult-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-nell-995-h25-keci-euclidean": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-Keci-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-nell-995-h25-omult-euclidean": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-OMult-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-nell-995-h25-pykeen-quate-euclidean": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-Pykeen_QuatE-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-nell-995-h25-qmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "NELL-995-h25-QMult-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-wn18rr-aconex-angular": lambda out_fn: knowledge_graph(out_fn, "WN18RR-AConEx-dim128-epoch256-KvsAll", "angular"),
+    "kg-wn18rr-complex-angular": lambda out_fn: knowledge_graph(out_fn, "WN18RR-ComplEx-dim128-epoch256-KvsAll", "angular"),
+    "kg-wn18rr-convo-angular": lambda out_fn: knowledge_graph(out_fn, "WN18RR-ConvO-dim128-epoch256-KvsAll", "angular"),
+    "kg-wn18rr-convq-angular": lambda out_fn: knowledge_graph(out_fn, "WN18RR-ConvQ-dim128-epoch256-KvsAll", "angular"),
+    "kg-wn18rr-distmult-angular": lambda out_fn: knowledge_graph(out_fn, "WN18RR-DistMult-dim128-epoch256-KvsAll", "angular"),
+    "kg-wn18rr-keci-angular": lambda out_fn: knowledge_graph(out_fn, "WN18RR-Keci-dim128-epoch256-KvsAll", "angular"),
+    "kg-wn18rr-omult-angular": lambda out_fn: knowledge_graph(out_fn, "WN18RR-OMult-dim128-epoch256-KvsAll", "angular"),
+    "kg-wn18rr-pykeen-quate-angular": lambda out_fn: knowledge_graph(out_fn, "WN18RR-Pykeen_QuatE-dim128-epoch256-KvsAll", "angular"),
+    "kg-wn18rr-qmult-angular": lambda out_fn: knowledge_graph(out_fn, "WN18RR-QMult-dim128-epoch256-KvsAll", "angular"),
+    "kg-wn18rr-aconex-euclidean": lambda out_fn: knowledge_graph(out_fn, "WN18RR-AConEx-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-wn18rr-complex-euclidean": lambda out_fn: knowledge_graph(out_fn, "WN18RR-ComplEx-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-wn18rr-convo-euclidean": lambda out_fn: knowledge_graph(out_fn, "WN18RR-ConvO-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-wn18rr-convq-euclidean": lambda out_fn: knowledge_graph(out_fn, "WN18RR-ConvQ-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-wn18rr-distmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "WN18RR-DistMult-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-wn18rr-keci-euclidean": lambda out_fn: knowledge_graph(out_fn, "WN18RR-Keci-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-wn18rr-omult-euclidean": lambda out_fn: knowledge_graph(out_fn, "WN18RR-OMult-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-wn18rr-pykeen-quate-euclidean": lambda out_fn: knowledge_graph(out_fn, "WN18RR-Pykeen_QuatE-dim128-epoch256-KvsAll", "euclidean"),
+    "kg-wn18rr-qmult-euclidean": lambda out_fn: knowledge_graph(out_fn, "WN18RR-QMult-dim128-epoch256-KvsAll", "euclidean"),
 }
 
 DATASETS.update({

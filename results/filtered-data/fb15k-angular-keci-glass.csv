@@ -1,0 +1,2 @@
+"algorithm","parameters","count","k-nn","epsilon","largeepsilon","rel","qps","p50","p95","p99","p999","distcomps","build","candidates","indexsize","queriessize","dataset"
+"glass","glass_({'L': 200, 'R': 10, 'level': 2})","10","0","0","0","inf","502887.607487409","0.0019885158053512","0.0019885158053512","0.0019885158053512","0.0019885158053512","0","0.671956777572632","0","18404","0.0365966464991102","kg-fb15k-237-keci-angular"

@@ -1,0 +1,2 @@
+"algorithm","parameters","count","k-nn","epsilon","largeepsilon","rel","qps","p50","p95","p99","p999","distcomps","build","candidates","indexsize","queriessize","dataset"
+"glass","glass_({'L': 200, 'R': 95, 'level': 3})","10","0","0","0","inf","1701704.05032788","0.000587646241001494","0.000587646241001494","0.000587646241001494","0.000587646241001494","0","8.59677839279175","0","106572","0.0626266359179588","kg-yago3-10-omult-euclidean"

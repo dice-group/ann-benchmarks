@@ -1,0 +1,2 @@
+"algorithm","parameters","count","k-nn","epsilon","largeepsilon","rel","qps","p50","p95","p99","p999","distcomps","build","candidates","indexsize","queriessize","dataset"
+"bruteforce-blas","BruteForceBLAS()","10","1","1","1","0.0964613983602042","742.662675128482","1.34650629479438","1.34650629479438","1.34650629479438","1.34650629479438","0","0.0216450691223145","10","4","0.00538602535708152","kg-yago3-10-omult-euclidean"

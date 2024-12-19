@@ -1,0 +1,2 @@
+"algorithm","parameters","count","k-nn","epsilon","largeepsilon","rel","qps","p50","p95","p99","p999","distcomps","build","candidates","indexsize","queriessize","dataset"
+"bruteforce-blas","BruteForceBLAS()","10","1","1","1","0.0961360627654096","4934.89455451753","0.202638577320613","0.202638577320613","0.202638577320613","0.202638577320613","0","0.00216794013977051","10","7196","1.45818718525862","kg-fb15k-237-keci-euclidean"

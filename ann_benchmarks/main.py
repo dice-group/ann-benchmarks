@@ -9,17 +9,18 @@ import random
 import shutil
 import sys
 from typing import List
+from numbers import Number
 
 import docker
 import psutil
 
 from .definitions import (Definition, InstantiationStatus, algorithm_status,
-                                     get_definitions, list_algorithms)
+                                     get_definitions, list_algorithms, similar_definitions_for_optimizer)
 from .constants import INDEX_DIR
 from .datasets import DATASETS, get_dataset
 from .results import build_result_filepath
 from .runner import run, run_docker
-
+from .bay_opt import execute_using_bayesian_optimizer
 
 logging.config.fileConfig("logging.conf")
 logger = logging.getLogger("annb")
@@ -123,7 +124,16 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument("--run-disabled", help="run algorithms that are disabled in algos.yml", action="store_true")
     parser.add_argument("--parallelism", type=positive_int, help="Number of Docker containers in parallel", default=1)
-
+    parser.add_argument(
+        "--use-bayesian-optimizer",
+        action="store_true",
+        help="If set, then the algorithm parameters will be set using a Bayesian Optimizer rather than using cross product of config parameters.",
+    )
+    parser.add_argument(
+        "--move-bayesian-optimizer-result-files",
+        action="store_true",
+        help="If set, then the result files written during Bayesian Optimization will be moved to the sub-directory 'bay_opt'.",
+    )
     args = parser.parse_args()
     if args.timeout == -1:
         args.timeout = None
@@ -296,7 +306,6 @@ def limit_algorithms(definitions: List[Definition], limit: int) -> List[Definiti
     """
     return definitions if limit < 0 else definitions[:limit]
 
-
 def main():
     args = parse_arguments()
 
@@ -342,4 +351,25 @@ def main():
     else:
         logger.info(f"Order: {definitions}")
 
-    create_workers_and_execute(definitions, args)
+    if args.use_bayesian_optimizer:
+        logger.info(f"use_bayesian_optimizer set as {args.use_bayesian_optimizer}")
+        # Until the list is exhausted
+        while(len(definitions) > 0):
+            bay_opt_definitions = []
+            definition_1 = definitions.pop() # This definition is chosen for Bayesian Optimizer
+            bay_opt_definitions.append(definition_1)
+            # Check if there are any more definitions left to compare
+            if len(definitions) > 0:
+                # Search for other similar definitions
+                for other_definition in definitions:
+                    if similar_definitions_for_optimizer(definition_1, other_definition):
+                        bay_opt_definitions.append(other_definition)
+            # Filter out the definitions which will be passed to the optimizer
+            definitions = [definition for definition in definitions if definition not in bay_opt_definitions]
+            logger.info(f"Running Bayesian Optimizer for: {bay_opt_definitions},{args}")
+            execute_using_bayesian_optimizer(bay_opt_definitions, args)
+    
+    if len(definitions) > 0:
+        create_workers_and_execute(definitions, args)
+    
+    

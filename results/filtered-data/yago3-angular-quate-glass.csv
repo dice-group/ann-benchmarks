@@ -1,0 +1,2 @@
+"algorithm","parameters","count","k-nn","epsilon","largeepsilon","rel","qps","p50","p95","p99","p999","distcomps","build","candidates","indexsize","queriessize","dataset"
+"glass","glass_({'L': 200, 'R': 22, 'level': 1})","10","0","0","0","inf","1713385.84174625","0.000583639689466509","0.000583639689466509","0.000583639689466509","0.000583639689466509","0","7.2155933380127","0","68408","0.0399256246510593","kg-yago3-10-pykeen-quate-angular"
