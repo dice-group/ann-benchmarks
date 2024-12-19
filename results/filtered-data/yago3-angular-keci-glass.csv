@@ -1,0 +1,2 @@
+"algorithm","parameters","count","k-nn","epsilon","largeepsilon","rel","qps","p50","p95","p99","p999","distcomps","build","candidates","indexsize","queriessize","dataset"
+"glass","glass_({'L': 200, 'R': 9, 'level': 3})","10","0","0","0","inf","1698012.83964871","0.000588923683153553","0.000588923683153553","0.000588923683153553","0.000588923683153553","0","4.17573523521423","0","103000","0.0606591408468435","kg-yago3-10-keci-angular"
